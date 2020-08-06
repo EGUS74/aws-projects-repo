@@ -1,0 +1,19 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  This template deploys Kitten Carousel Static App on EC2 instance
+  It also creates a security group allowing http(Port 80) and SSh(22) connections from anywhere
+  
+Resources:
+  Logical ID:
+    Type: Resource type
+    Properties:
+      Set of properties
+
+Outputs:
+  Logical ID:
+    Description: Information about the value
+    Value: Value to return
+    Export:
+      Name: Value to export
