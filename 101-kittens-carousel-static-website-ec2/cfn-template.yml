@@ -6,14 +6,49 @@ Description: >
   It also creates a security group allowing http(Port 80) and SSh(22) connections from anywhere
   
 Resources:
-  Logical ID:
-    Type: Resource type
-    Properties:
-      Set of properties
+ WebServerSecurityGroup:
+   Type: AWS::EC2::SecurityGroup
+  Properties: 
+      GroupDescription: Enable HTTP for Apache Web Server
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 20
+          CidrIp: 0.0.0.0/0
+  
+  WebServerEC2Instance:
+      Type: AWS::EC2::Instance
+      Properties: 
+      
+        ImageId: ami-02354e95b39ca8dec
+        InstanceType: t2.micro
+        KeyName: my_key_for_ssh_linux
+        SecurityGroupIds: 
+          - !Ref WebServerSecurityGroup
+        Tags: 
+          - Key: Name
+            Value: !Sub Web Server Of  ${AWS::StackName} Stack
+
+        UserData: |
+            #! /bin/bash
+            yum update -y
+            yum install httpd -y
+            FOLDER="https://raw.githubusercontent.com/EGUS74/aws-projects-repo/master/101-kittens-carousel-static-website-ec2/static-web/"
+            curl -s --create-dir -o "/var/www/html/index.html" -L "$FOLDER"index.html
+            curl -s --create-dir -o "/var/www/html/cat0.jpg" -L "$FOLDER"cat0.jpg
+            curl -s --create-dir -o "/var/www/html/cat1.jpg" -L "$FOLDER"cat1.jpg
+            curl -s --create-dir -o "/var/www/html/cat2.jpg" -L "$FOLDER"cat2.jpg
+            systemctl start httpd
+            systeml enable httpd
+        
 
 Outputs:
-  Logical ID:
-    Description: Information about the value
-    Value: Value to return
-    Export:
-      Name: Value to export
+  WebsiteURL:
+    Description: Kittens Carousel App URL
+    Value: !Sub 
+      - http://${PublicAddress}
+      - PublicAddress: !GetAtt WebServerEC2Instance.PublicDnsName
